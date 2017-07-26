@@ -7,9 +7,12 @@
 'use strict'
 
 var document_width = window.screen.availWidth;
-var checkerboard_width =  0.92*document_width;
-var cell_side_length = 0.18*document_width;
-var cell_space = 0.04*document_width;
+var checkerboard_width =  0.92*document_width; // 总长度
+var cell_side_length = 0.18*document_width; // 方块边长
+var cell_space = 0.04*document_width; // 方块间隔
+
+var maxColumn = 4; // 最大列数
+var maxRaw = 4; // 最大行数
 
 function get_pos_top(i,j) {
     return cell_space+i*(cell_space+cell_side_length);
@@ -43,5 +46,22 @@ function getNumberColor(number) {
     if(number < 8)
         return '#776e65';
     return 'white';
+}
+
+/**
+ * whether board is no space
+ * @param board
+ * @returns {boolean}
+ */
+function nospace(board) {
+    for(var i = 0;i < maxRaw;i++)
+    {
+        for(var j = 0;j < maxColumn;j++)
+        {
+            if(board[i][j] == 0)
+                return false;
+        }
+    }
+    return true;
 }
 

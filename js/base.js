@@ -29,17 +29,19 @@ $(document).keydown(function (event) {
             moveLeft();
             break;
         case 38://top
-            alert('you press top');
+            moveTop();
             break;
         case 39://right
-            alert('you press right');
+            moveRight();
             break;
         case 40://bottom
-            alert('you press bottom');
+            moveBottom();
             break;
         default:
-            break;
+            return;
     }
+    generateOneNumber();
+    setTimeout("updateBoardView()",220);
 });
 /**
  *  开始一局新的游戏
@@ -56,6 +58,8 @@ function newGame() {
  * 随机生成一个数字
  */
 function generateOneNumber() {
+    if(nospace(board))
+        return false;
 
     var randX = parseInt(Math.floor(Math.random()*4));
     var randY = parseInt(Math.floor(Math.random()*4));
@@ -67,16 +71,16 @@ function generateOneNumber() {
         {
             break;
         }
-        randX =parseInt(Math.floor(Math.random()*4));
-        randY = parseInt(Math.floor(Math.random()*4));
+        randX = parseInt(Math.floor(Math.random()*maxRaw));
+        randY = parseInt(Math.floor(Math.random()*maxColumn));
         time++;
     }
 
     if(time >= 50)
     {
-        for(var i = 0;i < 4;i++)
+        for(var i = 0;i < maxRaw;i++)
         {
-            for(var j = 0;j< 4;j++)
+            for(var j = 0;j< maxColumn;j++)
             {
                 if(board[i][j] == 0)
                 {
@@ -89,18 +93,45 @@ function generateOneNumber() {
 
     var randomNumber = Math.random() < 0.5?2:4;
     board[randX][randY] = randomNumber;
-    showNumberWithAnimation(randY,randY,randomNumber);
+    showNumberWithAnimation(randX,randY,randomNumber);
     return true;
 }
 /**
  * 整体向左移动
  */
 function moveLeft() {
-    for(var i = 0;i < 4;i++)
+    for(var i = 0;i < maxColumn ;i++)
     {
-        for(var j = 0;j < 4;j++)
+        for(var j = 0;j < maxRaw ;j++)
         {
-            showMoveWithAnimation(i,j,i,0);
+            if(board[i][j] != 0)
+            {
+                var finalToK = -1;
+                for(var k = j-1;k >= 0;k--)
+                {
+                    if(board[i][k] == 0)
+                    {
+                        finalToK = k;
+                    } else if(board[i][k] == board[i][j]) {
+                        showMoveWithAnimation(i,j,i,k);
+                        board[i][k] = board[i][j]*2;
+                        board[i][j] = 0;
+
+                        score += board[i][k];
+
+                        updateScore(score);
+
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                if(finalToK >= 0){
+                    showMoveWithAnimation(i,j,i,finalToK);
+                    board[i][finalToK] = board[i][j];
+                    board[i][j] = 0;
+                }
+            }
         }
     }
 }
@@ -108,19 +139,117 @@ function moveLeft() {
  * 整体向右移动
  */
 function moveRight() {
+    for(var i = 0;i < maxColumn;i++)
+    {
+        for(var j = maxRaw-1;j >= 0;j--)
+        {
+            if(board[i][j] > 0)
+            {
+                var finalToK = -1;
+                for(var k = j+1;k < maxRaw;k++)
+                {
+                    if(board[i][k] == 0)
+                    {
+                        finalToK = k;
+                    } else if(board[i][k] == board[i][j]) {
 
+                        showMoveWithAnimation(i,j,i,k);
+                        board[i][k] = board[i][j]*2;
+                        board[i][j] = 0;
+                        score += board[i][k];
+
+                        updateScore(score);
+
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+
+                if(finalToK >= 0)
+                {
+                    showMoveWithAnimation(i,j,i,finalToK);
+                    board[i][finalToK] = board[i][j];
+                    board[i][j] = 0;
+                }
+            }
+        }
+    }
 }
 /**
  * 整体向上移动
  */
 function moveTop() {
+    for(var j = 0;j < maxRaw;j++)
+    {
+        for(var i = 0 ;i < maxColumn ;i++)
+        {
+            var finalToK = -1;
+            for(var k = i-1;k >= 0;k--)
+            {
+                if(board[k][j] == 0)
+                {
+                    finalToK = k;
+                } else if(board[k][j] == board[i][j]) {
+                    showMoveWithAnimation(i,j,k,j);
+                    board[k][j] = board[i][j]*2;
+                    board[i][j] = 0;
 
+                    score += board[k][j];
+
+                    updateScore(score);
+
+                    break;
+                } else {
+                    break;
+                }
+            }
+
+            if(finalToK >= 0)
+            {
+                showMoveWithAnimation(i,j,finalToK,j);
+                board[finalToK][j] = board[i][j];
+                board[i][j] = 0;
+            }
+        }
+    }
 }
 /**
  * 整体向下移动
  */
 function moveBottom() {
+    for(var j = 0;j < maxRaw;j++)
+    {
+        for(var i = maxColumn-1;i >= 0 ;i--)
+        {
+            var finalToK = -1;
+            for(var k = i+1;k < maxColumn;k++)
+            {
+                if(board[k][j] == 0)
+                {
+                    finalToK = k;
+                } else if(board[k][j] == board[i][j]) {
+                    showMoveWithAnimation(i,j,k,j);
+                    board[k][j] = board[i][j]*2;
+                    board[i][j] = 0;
 
+                    score += board[k][j];
+
+                    updateScore(score);
+                    break;
+                } else {
+                    break;
+                }
+            }
+
+            if(finalToK >= 0)
+            {
+                showMoveWithAnimation(i,j,finalToK,j);
+                board[finalToK][j] = board[i][j];
+                board[i][j] = 0;
+            }
+        }
+    }
 }
 
 /**
@@ -128,32 +257,32 @@ function moveBottom() {
  */
 function init() {
     // row
-    for(var i = 0;i < 4;i++)
+    for(var i = 0;i < maxRaw;i++)
     {
-        board[i] = new Array(4);
+        board[i] = new Array(maxColumn);
         // column
-        for(var j = 0;j < 4;j++)
+        for(var j = 0;j < maxColumn;j++)
         {
             board[i][j] = 0;
             var grid_cell = $('#grid_cell_'+i+'_'+j);
             grid_cell.css('top',get_pos_top(i,j));
-            grid_cell.css('left',get_pos_left(i,j))
+            grid_cell.css('left',get_pos_left(i,j));
         }
     }
-    updateBoardView();
+    createBoardView();
     score = 0;
-    updateScore(score)
+    updateScore(score);
 }
 
 /**
  * 刷新棋盘上产生的数字
  */
-function updateBoardView() {
-     var numberCellClass =  $('.number_cell');
-     numberCellClass.remove();
-    for(var i = 0;i < 4;i++)
+function createBoardView() {
+    var numberCellClass =  $('.number_cell');
+    numberCellClass.remove();
+    for(var i = 0;i < maxRaw;i++)
     {
-        for(var j = 0;j < 4;j++)
+        for(var j = 0;j < maxColumn;j++)
         {
             $('#checker_board').append('<div class="number_cell" id="number_cell_'+i+'_'+j+'" ></div>');
             var numberCell = $('#number_cell_'+i+'_'+j);
@@ -164,8 +293,8 @@ function updateBoardView() {
                 numberCell.css('height','0px');
                 numberCell.css('top',get_pos_top(i,j)+cell_side_length/2);
                 numberCell.css('left',get_pos_left(i,j)+cell_side_length/2);
-            } else
-            {
+
+            } else {
                 numberCell.css('width',cell_side_length);
                 numberCell.css('height',cell_side_length);
                 numberCell.css('top',get_pos_top(i,j));
@@ -178,6 +307,36 @@ function updateBoardView() {
     }
     numberCellClass.css('line-height',cell_side_length+'px');
     numberCellClass.css('font-size',0.6*cell_side_length+'px');
+}
+
+/**
+ * 刷新棋盘上产生的数字
+ */
+function updateBoardView() {
+    for(var i = 0;i < maxRaw;i++)
+    {
+        for(var j = 0;j < maxColumn;j++)
+        {
+            var numberCell = $('#number_cell_'+i+'_'+j);
+
+            if(board[i][j] == 0)
+            {
+                numberCell.css('width','0px');
+                numberCell.css('height','0px');
+                numberCell.text("");
+                numberCell.css('background-color','#00000000');
+                numberCell.css('color','#00000000');
+            } else {
+                numberCell.css('width',cell_side_length);
+                numberCell.css('height',cell_side_length);
+                numberCell.css('top',get_pos_top(i,j));
+                numberCell.css('left',get_pos_left(i,j));
+                numberCell.css('background-color',getBackgroundColorByNumber(board[i][j]));
+                numberCell.css('color',getNumberColor(board[i][j]));
+                numberCell.text(board[i][j]);
+            }
+        }
+    }
 }
 
 function updateScore(score) {
